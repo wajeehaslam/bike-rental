@@ -50,7 +50,33 @@ router.post("/signup", async function (req, res) {
     const token = assignToken({
       email: user.email,
       _id: user._id,
-      role: user.role,
+      role: "user",
+    });
+    res.status(200).send({
+      message: "User registered Successfully",
+      token: token,
+    });
+  } catch (error) {
+    console.log(error);
+    if (error.name === "MongoServerError" && error.code === 11000) {
+      return res.status(500).send({
+        message: "Email already exists",
+      });
+    }
+    return res.status(500).send(error);
+  }
+});
+
+router.post("/registerManger", async function (req, res) {
+  try {
+    const payload = req.body;
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(payload.password, salt);
+    const user = await User.create({ ...payload, password: hash, salt });
+    const token = assignToken({
+      email: user.email,
+      _id: user._id,
+      role: "manager",
     });
     res.status(200).send({
       message: "User registered Successfully",
