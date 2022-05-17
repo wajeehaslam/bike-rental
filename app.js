@@ -2,6 +2,7 @@ require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 
@@ -22,6 +23,7 @@ db.once("open", function () {
   console.log("db is connected!");
 });
 
+app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

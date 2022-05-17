@@ -28,8 +28,11 @@ router.post("/login", async function (req, res) {
         role: user.role,
       });
       res.status(200).send({
-        message: "Signed in successfully!",
         token,
+        _id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
       });
     } else {
       return res.status(403).send({
@@ -53,8 +56,11 @@ router.post("/signup", async function (req, res) {
       role: "user",
     });
     res.status(200).send({
-      message: "User registered Successfully",
+      _id: user.id,
       token: token,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     });
   } catch (error) {
     console.log(error);
@@ -72,15 +78,23 @@ router.post("/registerManger", async function (req, res) {
     const payload = req.body;
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(payload.password, salt);
-    const user = await User.create({ ...payload, password: hash, salt });
+    const user = await User.create({
+      ...payload,
+      password: hash,
+      salt,
+      role: "manager",
+    });
     const token = assignToken({
       email: user.email,
       _id: user._id,
       role: "manager",
     });
     res.status(200).send({
-      message: "User registered Successfully",
       token: token,
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     });
   } catch (error) {
     console.log(error);
