@@ -20,12 +20,11 @@ router.get("/", authGuard, roleGuard("manager"), async function (req, res) {
 
 router.post("/", authGuard, roleGuard("user"), async function (req, res) {
   try {
-    const { bikeId, startTime, endTime } = req.body;
+    const { bikeId, startTime } = req.body;
     await Reservation.create({
       user: req.user._id,
       bike: bikeId,
       startTime,
-      endTime,
     });
     res.status(200).send({
       message: "Bike reserved!",
