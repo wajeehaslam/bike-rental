@@ -6,7 +6,11 @@ const router = express.Router();
 
 router.get("/", async function (req, res) {
   try {
-    const bikes = await Bike.paginate({}, { customLabels: { docs: "bikes" } });
+    const { page, limit } = req.query;
+    const bikes = await Bike.paginate(
+      {},
+      { customLabels: { docs: "bikes" }, page, limit }
+    );
     res.status(200).send(bikes);
   } catch (error) {
     return res.status(500).send({
