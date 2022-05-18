@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema(
     },
     password: { type: String },
     salt: { type: String },
+    reservationCount: { type: Number },
   },
   { versionKey: false, timestamps: true }
 );

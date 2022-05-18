@@ -3,6 +3,7 @@ const authGuard = require("../helpers/auth-guard");
 const roleGuard = require("../helpers/role-guard");
 const Bike = require("../models/Bike");
 const Reservation = require("../models/Reservation");
+const User = require("../models/User");
 const router = express.Router();
 
 router.get("/", authGuard, roleGuard("manager"), async function (req, res) {
@@ -61,6 +62,10 @@ router.post("/", authGuard, roleGuard("user"), async function (req, res) {
         isReserved: true,
       }
     );
+    const user = await User.findById(req.user._id);
+    if (user)
+      await user.update({ reservationCount: (user.reservationCount || 0) + 1 });
+
     res.status(200).send({
       message: "Bike reserved!",
     });
@@ -70,5 +75,46 @@ router.post("/", authGuard, roleGuard("user"), async function (req, res) {
     });
   }
 });
+
+router.post(
+  "/cancelReservation",
+  authGuard,
+  roleGuard("user"),
+  async function (req, res) {
+    try {
+      const { endTime, rating } = req.body;
+
+      await Bike.updateOne(
+        {
+          _id: bikeId,
+        },
+        {
+          isReserved: true,
+        }
+      );
+      await Reservation.create({
+        user: req.user._id,
+        bike: bikeId,
+        startTime,
+      });
+
+      await Bike.updateOne(
+        {
+          _id: bikeId,
+        },
+        {
+          isReserved: true,
+        }
+      );
+      res.status(200).send({
+        message: "Bike reserved!",
+      });
+    } catch (error) {
+      return res.status(500).send({
+        message: error.message || "internal server error",
+      });
+    }
+  }
+);
 
 module.exports = router;
