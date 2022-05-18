@@ -12,6 +12,9 @@ router.get("/", async function (req, res) {
       customLabels: { docs: "bikes" },
       page,
       limit,
+      sort: {
+        createdAt: -1, //Sort by Date Added DESC
+      },
     });
     res.status(200).send(bikes);
   } catch (error) {

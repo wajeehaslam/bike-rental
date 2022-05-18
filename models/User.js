@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String },
     salt: { type: String },
   },
-  { versionKey: false }
+  { versionKey: false, timestamps: true }
 );
 userSchema.plugin(mongoosePaginate);
 const User = mongoose.model("User", userSchema);

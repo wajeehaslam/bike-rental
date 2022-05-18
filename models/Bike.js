@@ -8,7 +8,7 @@ const bikeSchema = new mongoose.Schema(
     location: String,
     isReserved: { type: Boolean, default: false },
   },
-  { versionKey: false }
+  { versionKey: false, timestamps: true }
 );
 
 bikeSchema.plugin(mongoosePaginate);
