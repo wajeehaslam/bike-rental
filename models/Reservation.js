@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 const reservationSchema = new mongoose.Schema(
   {
@@ -10,6 +11,7 @@ const reservationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+reservationSchema.plugin(mongoosePaginate);
 const Reservation = mongoose.model("Reservations", reservationSchema);
 
 module.exports = Reservation;
