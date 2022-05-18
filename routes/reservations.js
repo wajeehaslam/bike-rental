@@ -1,7 +1,6 @@
 const express = require("express");
 const authGuard = require("../helpers/auth-guard");
 const roleGuard = require("../helpers/role-guard");
-const Bike = require("../models/Bike");
 const Reservation = require("../models/Reservation");
 const router = express.Router();
 

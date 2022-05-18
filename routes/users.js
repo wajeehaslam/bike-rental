@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const authGuard = require("../helpers/auth-guard");
 const roleGuard = require("../helpers/role-guard");
 const User = require("../models/User");
+const assignToken = require("../helpers/jwt-helper");
 const router = express.Router();
 
 router.get("/", async function (req, res, next) {
@@ -102,10 +103,14 @@ router.put(
       if (email) {
         updatePayload.email = email;
       }
-      await User.findByIdAndUpdate(id, updatePayload);
-      return res.status(200).send({
-        message: "User updated Successfully",
-      });
+      const updatedUser = await User.findByIdAndUpdate(id, updatePayload, {
+        new: true,
+      })
+        .lean()
+        .select("-password")
+        .select("-salt");
+
+      return res.status(200).send({ ...updatedUser });
     } catch (error) {
       console.log(error);
       if (error.name === "MongoServerError" && error.code === 11000) {
@@ -120,19 +125,5 @@ router.put(
     }
   }
 );
-
-router.get("/me", authGuard, async function (req, res) {
-  try {
-    const { _id } = req.user;
-    const user = await User.findById(_id);
-    res.status(200).send({
-      user,
-    });
-  } catch (error) {
-    return res.status(500).send({
-      message: error.message || "internal server error",
-    });
-  }
-});
 
 module.exports = router;

@@ -3,6 +3,7 @@ const User = require("../models/User");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const assignToken = require("../helpers/jwt-helper");
+const authGuard = require("../helpers/auth-guard");
 
 router.post("/login", async function (req, res) {
   try {
@@ -104,6 +105,20 @@ router.post("/registerManger", async function (req, res) {
       });
     }
     return res.status(500).send(error);
+  }
+});
+
+router.get("/me", authGuard, async function (req, res) {
+  try {
+    const { _id } = req.user;
+    const user = await User.findById(_id).select("-password").select("-salt");
+    res.status(200).send({
+      user,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: error.message || "internal server error",
+    });
   }
 });
 
