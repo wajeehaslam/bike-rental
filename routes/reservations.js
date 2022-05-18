@@ -1,6 +1,7 @@
 const express = require("express");
 const authGuard = require("../helpers/auth-guard");
 const roleGuard = require("../helpers/role-guard");
+const { ObjectId } = require("mongodb");
 const Bike = require("../models/Bike");
 const Reservation = require("../models/Reservation");
 const User = require("../models/User");
@@ -52,6 +53,7 @@ router.post("/", authGuard, roleGuard("user"), async function (req, res) {
       user: req.user._id,
       bike: bikeId,
       startTime,
+      status: "inProgress",
     });
 
     await Bike.updateOne(
@@ -82,28 +84,42 @@ router.post(
   roleGuard("user"),
   async function (req, res) {
     try {
-      const { endTime, rating } = req.body;
+      const { reservationId, bikeId, endTime, rating } = req.body;
 
-      await Bike.updateOne(
+      await Reservation.updateOne(
         {
-          _id: bikeId,
+          _id: reservationId,
         },
         {
-          isReserved: true,
+          endTime,
+          rating,
+          status: "cancelled",
         }
       );
-      await Reservation.create({
-        user: req.user._id,
-        bike: bikeId,
-        startTime,
-      });
+
+      const allReservations = await Reservation.aggregate([
+        { $match: { bike: new ObjectId(bikeId) } },
+        {
+          $group: {
+            _id: "$bike",
+            avgerageRating: { $avg: "$rating" },
+          },
+        },
+      ]);
+
+      let avgRating = 0;
+      if (allReservations.length)
+        allReservations.map(
+          (reservation) => (avgRating += reservation.avgerageRating || 0)
+        );
 
       await Bike.updateOne(
         {
           _id: bikeId,
         },
         {
-          isReserved: true,
+          isReserved: false,
+          rating: avgRating,
         }
       );
       res.status(200).send({

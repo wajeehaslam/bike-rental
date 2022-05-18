@@ -7,6 +7,7 @@ const bikeSchema = new mongoose.Schema(
     color: String,
     location: String,
     isReserved: { type: Boolean, default: false },
+    rating: { type: Number },
   },
   { versionKey: false, timestamps: true }
 );

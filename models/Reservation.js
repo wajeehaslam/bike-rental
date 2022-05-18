@@ -7,6 +7,8 @@ const reservationSchema = new mongoose.Schema(
     bike: { type: mongoose.Schema.Types.ObjectId, ref: "Bike" },
     startTime: Date,
     endTime: Date,
+    rating: { type: Number },
+    status: { type: String },
   },
   { timestamps: true }
 );
