@@ -86,7 +86,6 @@ router.delete(
 router.put(
   "/:id",
   authGuard,
-  roleGuard("manager"),
   async function (req, res, next) {
     try {
       const { id } = req.params;
