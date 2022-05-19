@@ -7,8 +7,17 @@ const assignToken = require("../helpers/jwt-helper");
 const router = express.Router();
 
 router.get("/", async function (req, res, next) {
-  const users = await User.paginate({}, { customLabels: { docs: "users" } });
-  res.status(200).send(users);
+  try {
+    const query = JSON.parse(req.query.query || `{}`);
+    const users = await User.paginate(query, {
+      customLabels: { docs: "users" },
+    });
+    res.status(200).send(users);
+  } catch (error) {
+    return res.status(500).send({
+      message: error.message || "internal server error",
+    });
+  }
 });
 
 router.get("/:id", async function (req, res) {

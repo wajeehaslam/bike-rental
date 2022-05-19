@@ -13,7 +13,7 @@ router.get("/", authGuard, roleGuard("manager"), async function (req, res) {
       {},
       { customLabels: { docs: "reservations" } }
     );
-    res.status(200).send(bikes);
+    res.status(200).send(reservations);
   } catch (error) {
     return res.status(500).send({
       message: error.message || "internal server error",
@@ -21,30 +21,25 @@ router.get("/", authGuard, roleGuard("manager"), async function (req, res) {
   }
 });
 
-router.get(
-  "/myReservation",
-  authGuard,
-  roleGuard("user"),
-  async function (req, res) {
-    try {
-      const { userId, limit, page } = req.query;
-      const reservations = await Reservation.paginate(
-        { user: userId },
-        {
-          customLabels: { docs: "reservations" },
-          populate: ["user", "bike"],
-          limit,
-          page,
-        }
-      );
-      res.status(200).send(reservations);
-    } catch (error) {
-      return res.status(500).send({
-        message: error.message || "internal server error",
-      });
-    }
+router.get("/myReservation", authGuard, async function (req, res) {
+  try {
+    const { userId, limit, page } = req.query;
+    const reservations = await Reservation.paginate(
+      { user: userId },
+      {
+        customLabels: { docs: "reservations" },
+        populate: ["user", "bike"],
+        limit,
+        page,
+      }
+    );
+    res.status(200).send(reservations);
+  } catch (error) {
+    return res.status(500).send({
+      message: error.message || "internal server error",
+    });
   }
-);
+});
 
 router.post("/", authGuard, roleGuard("user"), async function (req, res) {
   try {
