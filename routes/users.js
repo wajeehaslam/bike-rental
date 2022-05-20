@@ -86,55 +86,54 @@ router.delete(
 );
 
 // update User
-router.put(
-  "/:id",
-  authGuard,
-  async function (req, res, next) {
-    try {
-      const { id } = req.params;
-      const { name, email, password } = req.body;
-      const user = await User.findOne({
-        _id: id,
+router.put("/:id", authGuard, async function (req, res, next) {
+  try {
+    const { id } = req.params;
+    const { name, email, password, role } = req.body;
+    const user = await User.findOne({
+      _id: id,
+    });
+    if (!user) {
+      return res.status(401).send({
+        message: "Invalid user id",
       });
-      if (!user) {
-        return res.status(401).send({
-          message: "Invalid user id",
-        });
-      }
-      const updatePayload = {};
-      if (name) {
-        updatePayload.name = name;
-      }
-      if (password) {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt);
-        updatePayload.password = hash;
-        updatePayload.salt = salt;
-      }
-      if (email) {
-        updatePayload.email = email;
-      }
-      const updatedUser = await User.findByIdAndUpdate(id, updatePayload, {
-        new: true,
-      })
-        .lean()
-        .select("-password")
-        .select("-salt");
+    }
+    const updatePayload = {};
+    if (name) {
+      updatePayload.name = name;
+    }
+    if (role) {
+      updatePayload.role = role;
+    }
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(password, salt);
+      updatePayload.password = hash;
+      updatePayload.salt = salt;
+    }
+    if (email) {
+      updatePayload.email = email;
+    }
+    const updatedUser = await User.findByIdAndUpdate(id, updatePayload, {
+      new: true,
+    })
+      .lean()
+      .select("-password")
+      .select("-salt");
 
-      return res.status(200).send({ ...updatedUser });
-    } catch (error) {
-      console.log(error);
-      if (error.name === "MongoServerError" && error.code === 11000) {
-        return res.status(500).send({
-          message: "User with this email is already exists",
-        });
-      } else {
-        res.status(500).send({
-          message: error.message || "Internal server error",
-        });
-      }
+    return res.status(200).send({ ...updatedUser });
+  } catch (error) {
+    console.log(error);
+    if (error.name === "MongoServerError" && error.code === 11000) {
+      return res.status(500).send({
+        message: "User with this email is already exists",
+      });
+    } else {
+      res.status(500).send({
+        message: error.message || "Internal server error",
+      });
     }
   }
-);
+});
 
 module.exports = router;
