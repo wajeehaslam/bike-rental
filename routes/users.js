@@ -9,7 +9,10 @@ const router = express.Router();
 router.get("/", async function (req, res, next) {
   try {
     const query = JSON.parse(req.query.query || `{}`);
+    const { page, limit } = req.query;
     const users = await User.paginate(query, {
+      limit,
+      page,
       customLabels: { docs: "users" },
     });
     res.status(200).send(users);
